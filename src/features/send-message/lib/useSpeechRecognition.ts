@@ -5,10 +5,10 @@ interface SpeechRecognitionHook {
   transcript: string;
   startListening: () => void;
   stopListening: () => void;
+  resetTranscript: () => void;
   isSupported: boolean;
 }
 
-// Web Speech API types
 interface SpeechRecognitionEvent {
   results: SpeechRecognitionResultList;
   resultIndex: number;
@@ -54,6 +54,7 @@ export const useSpeechRecognition = (): SpeechRecognitionHook => {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
+  const transcriptRef = useRef('');
 
   const SpeechRecognitionAPI =
     window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -64,36 +65,48 @@ export const useSpeechRecognition = (): SpeechRecognitionHook => {
     if (!SpeechRecognitionAPI) return;
 
     const recognition = new SpeechRecognitionAPI();
-    recognition.continuous = true;
+    recognition.continuous = false;
     recognition.interimResults = true;
     recognition.lang = 'ru-RU';
 
+    transcriptRef.current = '';
+    setTranscript('');
+
     recognition.onresult = (event: SpeechRecognitionEvent) => {
+      let interimTranscript = '';
       let finalTranscript = '';
+
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const result = event.results[i];
         if (result.isFinal) {
           finalTranscript += result[0].transcript;
+        } else {
+          interimTranscript += result[0].transcript;
         }
       }
+
       if (finalTranscript) {
-        setTranscript((prev) => prev + finalTranscript);
+        transcriptRef.current += finalTranscript;
+        setTranscript(transcriptRef.current);
+      } else if (interimTranscript) {
+        setTranscript(transcriptRef.current + interimTranscript);
       }
     };
 
-    recognition.onerror = (event: { error: string }) => {
-      console.error('Speech recognition error:', event.error);
+    recognition.onerror = () => {
       setIsListening(false);
     };
 
     recognition.onend = () => {
       setIsListening(false);
+      if (transcriptRef.current) {
+        setTranscript(transcriptRef.current);
+      }
     };
 
     recognitionRef.current = recognition;
     recognition.start();
     setIsListening(true);
-    setTranscript('');
   }, [SpeechRecognitionAPI]);
 
   const stopListening = useCallback(() => {
@@ -103,11 +116,17 @@ export const useSpeechRecognition = (): SpeechRecognitionHook => {
     }
   }, []);
 
+  const resetTranscript = useCallback(() => {
+    transcriptRef.current = '';
+    setTranscript('');
+  }, []);
+
   return {
     isListening,
     transcript,
     startListening,
     stopListening,
+    resetTranscript,
     isSupported,
   };
 };

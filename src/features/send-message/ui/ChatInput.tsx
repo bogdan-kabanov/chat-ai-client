@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Box, IconButton, InputBase } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import MicIcon from '@mui/icons-material/Mic';
 import MicOffIcon from '@mui/icons-material/MicOff';
-import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
+import { useSpeechRecognition } from '../lib/useSpeechRecognition';
 
 interface ChatInputProps {
   onSend: (message: string) => void;
@@ -12,12 +12,19 @@ interface ChatInputProps {
 
 const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled }) => {
   const [input, setInput] = useState('');
-  const { isListening, transcript, startListening, stopListening, isSupported } =
+  const { isListening, transcript, startListening, stopListening, resetTranscript, isSupported } =
     useSpeechRecognition();
+  const inputBeforeSpeech = useRef('');
+
+  useEffect(() => {
+    if (isListening) {
+      inputBeforeSpeech.current = input;
+    }
+  }, [isListening]);
 
   useEffect(() => {
     if (transcript) {
-      setInput((prev) => prev + transcript);
+      setInput(inputBeforeSpeech.current + transcript);
     }
   }, [transcript]);
 
@@ -25,6 +32,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled }) => {
     if (input.trim() && !disabled) {
       onSend(input.trim());
       setInput('');
+      resetTranscript();
     }
   };
 
@@ -39,6 +47,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled }) => {
     if (isListening) {
       stopListening();
     } else {
+      resetTranscript();
       startListening();
     }
   };
@@ -48,11 +57,20 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled }) => {
       sx={{
         display: 'flex',
         alignItems: 'center',
-        bgcolor: '#1a3a5c',
-        borderRadius: '28px',
-        px: 1,
-        py: 0.5,
-        border: '1px solid rgba(255,255,255,0.1)',
+        bgcolor: '#132f4c',
+        borderRadius: '50px',
+        px: 1.5,
+        py: 0.75,
+        border: isListening
+          ? '1px solid rgba(244,67,54,0.5)'
+          : '1px solid rgba(255,255,255,0.12)',
+        boxShadow: isListening
+          ? '0 0 12px rgba(244,67,54,0.2)'
+          : '0 4px 12px rgba(0,0,0,0.3)',
+        transition: 'all 0.2s',
+        '&:focus-within': {
+          borderColor: isListening ? 'rgba(244,67,54,0.5)' : 'rgba(25,118,210,0.6)',
+        },
       }}
     >
       {isSupported && (
@@ -60,8 +78,14 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled }) => {
           onClick={handleMicClick}
           disabled={disabled}
           sx={{
-            color: isListening ? '#f44336' : 'rgba(255,255,255,0.7)',
-            '&:hover': { color: isListening ? '#f44336' : '#fff' },
+            color: isListening ? '#f44336' : 'rgba(255,255,255,0.5)',
+            '&:hover': { color: isListening ? '#f44336' : '#90caf9' },
+            transition: 'color 0.2s',
+            animation: isListening ? 'micPulse 1.5s infinite' : 'none',
+            '@keyframes micPulse': {
+              '0%, 100%': { transform: 'scale(1)' },
+              '50%': { transform: 'scale(1.1)' },
+            },
           }}
         >
           {isListening ? <MicOffIcon /> : <MicIcon />}
@@ -72,17 +96,18 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled }) => {
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Ask whatever you want"
+        placeholder={isListening ? 'Listening...' : 'Ask whatever you want'}
         disabled={disabled}
         multiline
         maxRows={4}
         sx={{
           flex: 1,
-          color: '#fff',
-          px: 1,
+          color: '#e3f2fd',
+          px: 1.5,
+          fontSize: '1rem',
           '& .MuiInputBase-input': {
             '&::placeholder': {
-              color: 'rgba(255,255,255,0.5)',
+              color: isListening ? 'rgba(244,67,54,0.6)' : 'rgba(255,255,255,0.4)',
               opacity: 1,
             },
           },
@@ -95,10 +120,14 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled }) => {
         sx={{
           bgcolor: '#1976d2',
           color: '#fff',
-          width: 36,
-          height: 36,
+          width: 38,
+          height: 38,
           '&:hover': { bgcolor: '#1565c0' },
-          '&.Mui-disabled': { bgcolor: 'rgba(25,118,210,0.3)', color: 'rgba(255,255,255,0.3)' },
+          '&.Mui-disabled': {
+            bgcolor: 'rgba(25,118,210,0.2)',
+            color: 'rgba(255,255,255,0.2)',
+          },
+          transition: 'all 0.2s',
         }}
       >
         <SendIcon fontSize="small" />
