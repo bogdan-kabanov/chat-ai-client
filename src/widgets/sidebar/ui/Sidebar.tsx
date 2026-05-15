@@ -94,7 +94,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         >
           <AddIcon sx={{ color: '#90caf9', fontSize: 20 }} />
           <Typography sx={{ color: '#e3f2fd', fontSize: '0.9rem', fontWeight: 500 }}>
-            Новый чат
+            New chat
           </Typography>
         </Box>
       </Box>
@@ -115,7 +115,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               fontSize: '0.85rem',
             }}
           >
-            Нет чатов
+            No chats
           </Typography>
         ) : (
           <List disablePadding>
