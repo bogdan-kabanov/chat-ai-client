@@ -1,5 +1,15 @@
 import React, { useState, useCallback } from 'react';
-import { Box, Alert, Snackbar } from '@mui/material';
+import {
+  Box,
+  Alert,
+  Snackbar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button,
+} from '@mui/material';
 import { Sidebar } from '../widgets/sidebar';
 import { ChatArea } from '../widgets/chat-area';
 import { sendMessage } from '../shared/api';
@@ -22,6 +32,7 @@ const App: React.FC = () => {
   );
   const [error, setError] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [newChatDialogOpen, setNewChatDialogOpen] = useState(false);
 
   const saveSession = useCallback((msgs: Message[], convId: string | undefined) => {
     saveToStorage(STORAGE_KEY_MESSAGES, msgs);
@@ -32,12 +43,25 @@ const App: React.FC = () => {
     }
   }, []);
 
-  const handleNewChat = () => {
+  const resetChat = () => {
     setMessages([]);
     setConversationId(undefined);
     setError(null);
     removeFromStorage(STORAGE_KEY_MESSAGES);
     removeFromStorage(STORAGE_KEY_CONVERSATION);
+  };
+
+  const handleNewChat = () => {
+    if (messages.length > 0) {
+      setNewChatDialogOpen(true);
+    } else {
+      resetChat();
+    }
+  };
+
+  const handleConfirmNewChat = () => {
+    setNewChatDialogOpen(false);
+    resetChat();
   };
 
   const handleSelectConversation = (conversation: Conversation) => {
@@ -120,6 +144,40 @@ const App: React.FC = () => {
       />
 
       <ChatArea messages={messages} isLoading={isLoading} onSend={handleSend} />
+
+      <Dialog
+        open={newChatDialogOpen}
+        onClose={() => setNewChatDialogOpen(false)}
+        PaperProps={{
+          sx: {
+            bgcolor: '#132f4c',
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: 3,
+          },
+        }}
+      >
+        <DialogTitle sx={{ color: '#e3f2fd' }}>Начать новый чат?</DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ color: 'rgba(255,255,255,0.6)' }}>
+            Текущий чат уже сохранён. Вы можете вернуться к нему в любой момент через боковую панель.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button
+            onClick={() => setNewChatDialogOpen(false)}
+            sx={{ color: 'rgba(255,255,255,0.5)' }}
+          >
+            Отмена
+          </Button>
+          <Button
+            onClick={handleConfirmNewChat}
+            variant="contained"
+            sx={{ bgcolor: '#1976d2', '&:hover': { bgcolor: '#1565c0' } }}
+          >
+            Новый чат
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Snackbar
         open={!!error}
