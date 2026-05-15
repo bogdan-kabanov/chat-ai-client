@@ -20,6 +20,7 @@ const en = {
         'The current chat is already saved. You can return to it at any time via the sidebar.',
       cancel: 'Cancel',
       confirm: 'New chat',
+      alreadyNew: 'You are already in a new chat',
     },
   },
 };

@@ -194,7 +194,7 @@ const App: React.FC = () => {
           variant="filled"
           sx={{ width: '100%' }}
         >
-          Вы уже в новом чате
+          {t('dialog.alreadyNew')}
         </Alert>
       </Snackbar>
 
