@@ -1,8 +1,11 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 import ChatBubbleIcon from '@mui/icons-material/ChatBubble';
+import { useTranslation } from 'react-i18next';
 
 const WelcomeScreen: React.FC = () => {
+  const { t } = useTranslation();
+
   return (
     <Box
       sx={{
@@ -34,23 +37,21 @@ const WelcomeScreen: React.FC = () => {
         variant="h5"
         sx={{ color: '#90caf9', fontWeight: 400, mb: 1.5, fontSize: '1.4rem' }}
       >
-        Hi there!
+        {t('welcome.greeting')}
       </Typography>
 
       <Typography
         variant="h4"
         sx={{ color: '#fff', fontWeight: 700, mb: 2.5, fontSize: '2rem', lineHeight: 1.3 }}
       >
-        What would you like to know?
+        {t('welcome.question')}
       </Typography>
 
       <Typography
         variant="body1"
-        sx={{ color: 'rgba(255,255,255,0.55)', maxWidth: 420, lineHeight: 1.7 }}
+        sx={{ color: 'rgba(255,255,255,0.55)', maxWidth: 420, lineHeight: 1.7, whiteSpace: 'pre-line' }}
       >
-        Use one of the most common prompts below
-        <br />
-        or ask your own question
+        {t('welcome.hint')}
       </Typography>
     </Box>
   );

@@ -10,6 +10,7 @@ import {
   DialogActions,
   Button,
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { Sidebar } from '../widgets/sidebar';
 import { ChatArea } from '../widgets/chat-area';
 import { sendMessage } from '../shared/api';
@@ -23,6 +24,7 @@ import {
 } from '../shared/lib/storage';
 
 const App: React.FC = () => {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState<Message[]>(() =>
     loadFromStorage<Message[]>(STORAGE_KEY_MESSAGES, [])
   );
@@ -33,6 +35,7 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [newChatDialogOpen, setNewChatDialogOpen] = useState(false);
+  const [alreadyNewChatOpen, setAlreadyNewChatOpen] = useState(false);
 
   const saveSession = useCallback((msgs: Message[], convId: string | undefined) => {
     saveToStorage(STORAGE_KEY_MESSAGES, msgs);
@@ -52,10 +55,10 @@ const App: React.FC = () => {
   };
 
   const handleNewChat = () => {
-    if (messages.length > 0) {
-      setNewChatDialogOpen(true);
+    if (messages.length === 0) {
+      setAlreadyNewChatOpen(true);
     } else {
-      resetChat();
+      setNewChatDialogOpen(true);
     }
   };
 
@@ -156,10 +159,10 @@ const App: React.FC = () => {
           },
         }}
       >
-        <DialogTitle sx={{ color: '#e3f2fd' }}>Начать новый чат?</DialogTitle>
+        <DialogTitle sx={{ color: '#e3f2fd' }}>{t('dialog.newChatTitle')}</DialogTitle>
         <DialogContent>
           <DialogContentText sx={{ color: 'rgba(255,255,255,0.6)' }}>
-            Текущий чат уже сохранён. Вы можете вернуться к нему в любой момент через боковую панель.
+            {t('dialog.newChatDescription')}
           </DialogContentText>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
@@ -167,17 +170,33 @@ const App: React.FC = () => {
             onClick={() => setNewChatDialogOpen(false)}
             sx={{ color: 'rgba(255,255,255,0.5)' }}
           >
-            Отмена
+            {t('dialog.cancel')}
           </Button>
           <Button
             onClick={handleConfirmNewChat}
             variant="contained"
             sx={{ bgcolor: '#1976d2', '&:hover': { bgcolor: '#1565c0' } }}
           >
-            Новый чат
+            {t('dialog.confirm')}
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Snackbar
+        open={alreadyNewChatOpen}
+        autoHideDuration={3000}
+        onClose={() => setAlreadyNewChatOpen(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={() => setAlreadyNewChatOpen(false)}
+          severity="info"
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          Вы уже в новом чате
+        </Alert>
+      </Snackbar>
 
       <Snackbar
         open={!!error}

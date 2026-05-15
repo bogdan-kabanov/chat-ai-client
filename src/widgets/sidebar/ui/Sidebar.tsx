@@ -14,6 +14,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import { Conversation } from '../../../shared/types';
 import { getConversations, deleteConversation } from '../../../shared/api';
+import { useTranslation } from 'react-i18next';
+import { LanguageSwitcher } from '../../../features/language-switcher';
 
 interface SidebarProps {
   currentConversationId?: string;
@@ -30,6 +32,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(false);
+  const { t } = useTranslation();
 
   const fetchConversations = async () => {
     setLoading(true);
@@ -94,7 +97,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         >
           <AddIcon sx={{ color: '#90caf9', fontSize: 20 }} />
           <Typography sx={{ color: '#e3f2fd', fontSize: '0.9rem', fontWeight: 500 }}>
-            New chat
+            {t('sidebar.newChat')}
           </Typography>
         </Box>
       </Box>
@@ -115,7 +118,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               fontSize: '0.85rem',
             }}
           >
-            No chats
+            {t('sidebar.noChats')}
           </Typography>
         ) : (
           <List disablePadding>
@@ -166,6 +169,12 @@ const Sidebar: React.FC<SidebarProps> = ({
             ))}
           </List>
         )}
+      </Box>
+
+      <Divider sx={{ borderColor: 'rgba(255,255,255,0.06)' }} />
+
+      <Box sx={{ p: 2, display: 'flex', justifyContent: 'center' }}>
+        <LanguageSwitcher />
       </Box>
     </Box>
   );

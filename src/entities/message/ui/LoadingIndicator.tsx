@@ -1,8 +1,10 @@
 import React from 'react';
 import { Box, Typography, Avatar } from '@mui/material';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
+import { useTranslation } from 'react-i18next';
 
 const LoadingIndicator: React.FC = () => {
+  const { t } = useTranslation();
   return (
     <Box
       sx={{
@@ -53,7 +55,7 @@ const LoadingIndicator: React.FC = () => {
           ))}
         </Box>
         <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.6)', ml: 0.5 }}>
-          Thinking...
+          {t('chat.thinking')}
         </Typography>
       </Box>
     </Box>

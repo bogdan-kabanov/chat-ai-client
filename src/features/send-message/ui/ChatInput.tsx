@@ -4,6 +4,7 @@ import SendIcon from '@mui/icons-material/Send';
 import MicIcon from '@mui/icons-material/Mic';
 import MicOffIcon from '@mui/icons-material/MicOff';
 import { useSpeechRecognition } from '../lib/useSpeechRecognition';
+import { useTranslation } from 'react-i18next';
 
 interface ChatInputProps {
   onSend: (message: string) => void;
@@ -12,6 +13,7 @@ interface ChatInputProps {
 
 const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled }) => {
   const [input, setInput] = useState('');
+  const { t } = useTranslation();
   const { isListening, transcript, startListening, stopListening, resetTranscript, isSupported } =
     useSpeechRecognition();
   const inputBeforeSpeech = useRef('');
@@ -96,7 +98,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled }) => {
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder={isListening ? 'Listening...' : 'Ask whatever you want'}
+        placeholder={isListening ? t('chat.listening') : t('chat.placeholder')}
         disabled={disabled}
         multiline
         maxRows={4}
